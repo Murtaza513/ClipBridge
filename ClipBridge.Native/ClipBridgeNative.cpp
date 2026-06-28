@@ -66,11 +66,18 @@ extern "C" CLIPBRIDGE_API bool StartServer(int port)
         return false;
     }
 
-    SOCKET clientSocket = accept(listenSocket, nullptr, nullptr);
-    if (clientSocket != INVALID_SOCKET)
+    std::cout << "Server is listening. Press Ctrl+C to stop." << std::endl;
+
+    while (true)
     {
+        SOCKET clientSocket = accept(listenSocket, nullptr, nullptr);
+        if (clientSocket == INVALID_SOCKET)
+        {
+            break;
+        }
+
         char buffer[4096]{};
-        // This tiny demo accepts one TCP connection and reads one text payload.
+        // Each client connection carries one text payload, then the server waits again.
         int bytesReceived = recv(clientSocket, buffer, static_cast<int>(sizeof(buffer) - 1), 0);
         if (bytesReceived > 0)
         {

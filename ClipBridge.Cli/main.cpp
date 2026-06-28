@@ -57,9 +57,6 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        char message[4096]{};
-        GetLastMessage(message, sizeof(message));
-        std::cout << "Last message: " << message << std::endl;
         return 0;
     }
 

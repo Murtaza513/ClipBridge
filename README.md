@@ -1,6 +1,6 @@
 # ClipBridge
 
-ClipBridge is a minimal Windows x64 portfolio project that sends one text message over TCP between two console instances. It demonstrates a native C++ Winsock DLL, a C++ command-line app, and a tiny C# demo that calls the native DLL through P/Invoke.
+ClipBridge is a minimal Windows x64 portfolio project that sends text messages over TCP between two console instances. It demonstrates a native C++ Winsock DLL, a C++ command-line app, and a tiny C# demo that calls the native DLL through P/Invoke.
 
 ## Quick Demo for Recruiters
 
@@ -10,7 +10,7 @@ ClipBridge is a two-terminal demo:
 
 1. Terminal 1 starts the server.
 2. Terminal 2 sends text.
-3. Terminal 1 prints the received message.
+3. Terminal 1 prints each received message.
 
 Build or download the Windows x64 files first. If using a release zip, open PowerShell in the extracted folder. The C++ quick demo expects these files to be in the same folder:
 
@@ -44,8 +44,9 @@ Text sent.
 
 Terminal 1:
 Received: Hello from ClipBridge
-Last message: Hello from ClipBridge
 ```
+
+Run the Terminal 2 send command again with different text to send more messages. Stop the server with `Ctrl+C`.
 
 ### C# Interop Demo
 
@@ -71,7 +72,6 @@ The server should print:
 
 ```text
 Received: Hello from C#
-Last message: Hello from C#
 ```
 
 The C# demo requires the native DLL to be built first because it calls `ClipBridge.Native.dll`.
@@ -147,7 +147,7 @@ cd .\x64\Release
 .\ClipBridge.Cli.exe send 127.0.0.1 5050 "Hello from ClipBridge"
 ```
 
-The server waits for one connection, prints the received text, and exits.
+The server keeps running, prints each received message, and waits for the next connection. Stop it with `Ctrl+C`.
 
 ## Run the C# P/Invoke Demo
 
