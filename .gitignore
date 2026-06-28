@@ -1,0 +1,36 @@
+# Visual Studio user/local state
+.vs/
+.agents/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+UpgradeLog*.htm
+
+# Build outputs
+x64/
+Debug/
+Release/
+bin/
+obj/
+
+# C++ intermediates and symbols
+*.pdb
+*.ilk
+*.idb
+*.iobj
+*.ipdb
+*.obj
+*.exp
+*.lib
+*.recipe
+*.tlog
+*.log
+
+# .NET generated files
+*.deps.json
+*.runtimeconfig.json
+
+# OS files
+Thumbs.db
+Desktop.ini
