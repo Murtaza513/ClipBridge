@@ -4,6 +4,7 @@
 #define NOMINMAX
 #include <WinSock2.h>
 #include <WS2tcpip.h>
+#include <Windows.h>
 
 #include <algorithm>
 #include <cstring>
@@ -81,8 +82,10 @@ extern "C" CLIPBRIDGE_API bool StartServer(int port)
         int bytesReceived = recv(clientSocket, buffer, static_cast<int>(sizeof(buffer) - 1), 0);
         if (bytesReceived > 0)
         {
-            StoreLastMessage(buffer, bytesReceived);
-            std::cout << "Received: " << g_lastMessage << std::endl;
+            const std::string receivedText(buffer, bytesReceived);
+            StoreLastMessage(receivedText.c_str(), static_cast<int>(receivedText.size()));
+            WriteClipboard(receivedText.c_str());
+            std::cout << "Received: " << receivedText << std::endl;
             success = true;
         }
 
@@ -146,4 +149,64 @@ extern "C" CLIPBRIDGE_API void GetLastMessage(char* buffer, int bufferSize)
     }
 
     buffer[copyLength] = '\0';
+}
+
+extern "C" CLIPBRIDGE_API std::string ReadClipboard()
+{
+    std::string text;
+
+    if (!OpenClipboard(nullptr))
+    {
+        return text;
+    }
+
+    HANDLE clipboardData = GetClipboardData(CF_TEXT);
+    if (clipboardData != nullptr)
+    {
+        // CF_TEXT is ANSI text stored in movable global memory owned by the clipboard.
+        const char* clipboardText = static_cast<const char*>(GlobalLock(clipboardData));
+        if (clipboardText != nullptr)
+        {
+            text = clipboardText;
+            GlobalUnlock(clipboardData);
+        }
+    }
+
+    CloseClipboard();
+    return text;
+}
+
+extern "C" CLIPBRIDGE_API void WriteClipboard(const char* text)
+{
+    if (text == nullptr || !OpenClipboard(nullptr))
+    {
+        return;
+    }
+
+    const size_t textSize = std::strlen(text) + 1;
+    HGLOBAL clipboardData = GlobalAlloc(GMEM_MOVEABLE, textSize);
+    if (clipboardData == nullptr)
+    {
+        CloseClipboard();
+        return;
+    }
+
+    void* lockedData = GlobalLock(clipboardData);
+    if (lockedData == nullptr)
+    {
+        GlobalFree(clipboardData);
+        CloseClipboard();
+        return;
+    }
+
+    std::memcpy(lockedData, text, textSize);
+    GlobalUnlock(clipboardData);
+
+    EmptyClipboard();
+    if (SetClipboardData(CF_TEXT, clipboardData) == nullptr)
+    {
+        GlobalFree(clipboardData);
+    }
+
+    CloseClipboard();
 }

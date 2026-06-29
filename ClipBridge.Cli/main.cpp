@@ -10,6 +10,7 @@ namespace
     {
         std::cout << "Usage:\n"
                   << "  ClipBridge.Cli.exe server <port>\n"
+                  << "  ClipBridge.Cli.exe send <ip-address> <port>\n"
                   << "  ClipBridge.Cli.exe send <ip-address> <port> <text>\n";
     }
 
@@ -62,7 +63,7 @@ int main(int argc, char* argv[])
 
     if (command == "send")
     {
-        if (argc != 5)
+        if (argc != 4 && argc != 5)
         {
             PrintUsage();
             return 1;
@@ -75,7 +76,22 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        if (!SendText(argv[2], port, argv[4]))
+        std::string textToSend;
+        if (argc == 5)
+        {
+            textToSend = argv[4];
+        }
+        else
+        {
+            textToSend = ReadClipboard();
+            if (textToSend.empty())
+            {
+                std::cerr << "Clipboard is empty or does not contain text." << std::endl;
+                return 1;
+            }
+        }
+
+        if (!SendText(argv[2], port, textToSend.c_str()))
         {
             std::cerr << "Send failed." << std::endl;
             return 1;

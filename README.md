@@ -1,6 +1,6 @@
 # ClipBridge
 
-ClipBridge is a minimal Windows x64 portfolio project that sends text messages over TCP between two console instances. It demonstrates a native C++ Winsock DLL, a C++ command-line app, and a tiny C# demo that calls the native DLL through P/Invoke.
+ClipBridge is a minimal Windows x64 portfolio project that sends text messages over TCP between two console instances and can sync text through the Win32 clipboard. It demonstrates a native C++ Winsock DLL, Win32 clipboard APIs, a C++ command-line app, and a tiny C# demo that calls the native DLL through P/Invoke.
 
 ## Quick Demo for Recruiters
 
@@ -9,8 +9,8 @@ If you only have a few minutes, run the C++ demo first. It shows the core TCP te
 ClipBridge is a two-terminal demo:
 
 1. Terminal 1 starts the server.
-2. Terminal 2 sends text.
-3. Terminal 1 prints each received message.
+2. Terminal 2 sends manual text or the current clipboard text.
+3. Terminal 1 prints each received message and writes it to the local clipboard.
 
 Build or download the Windows x64 files first. If using a release zip, open PowerShell in the extracted folder. The C++ quick demo expects these files to be in the same folder:
 
@@ -48,6 +48,13 @@ Received: Hello from ClipBridge
 
 Run the Terminal 2 send command again with different text to send more messages. Stop the server with `Ctrl+C`.
 
+To send the current clipboard text instead of manual text:
+
+```powershell
+Set-Clipboard "Hello from the clipboard"
+.\ClipBridge.Cli.exe send 127.0.0.1 5050
+```
+
 ### C# Interop Demo
 
 Start the C++ server first:
@@ -84,14 +91,17 @@ The C# demo requires the native DLL to be built first because it calls `ClipBrid
 extern "C" __declspec(dllexport) bool StartServer(int port);
 extern "C" __declspec(dllexport) bool SendText(const char* ipAddress, int port, const char* text);
 extern "C" __declspec(dllexport) void GetLastMessage(char* buffer, int bufferSize);
+extern "C" __declspec(dllexport) std::string ReadClipboard();
+extern "C" __declspec(dllexport) void WriteClipboard(const char* text);
 ```
 
-The C++ CLI calls those functions directly. The C# console app calls `SendText` from the same native DLL using P/Invoke.
+The C++ CLI calls those functions directly. In server mode, received TCP text is written to the local clipboard. In send mode, the CLI sends manual text when provided, or reads and sends the current clipboard text when no text argument is provided. The C# console app calls `SendText` from the same native DLL using P/Invoke.
 
 ## Technologies
 
 - C++ native DLL
 - Winsock TCP sockets
+- Win32 clipboard APIs
 - C++ console app
 - C# .NET console app
 - P/Invoke for C# to native C++ interoperability
@@ -167,7 +177,15 @@ cd .\x64\Release
 .\ClipBridge.Cli.exe send 127.0.0.1 5050 "Hello from ClipBridge"
 ```
 
-The server keeps running, prints each received message, and waits for the next connection. Stop it with `Ctrl+C`.
+Or send the current clipboard text:
+
+```powershell
+cd .\x64\Release
+Set-Clipboard "Hello from the clipboard"
+.\ClipBridge.Cli.exe send 127.0.0.1 5050
+```
+
+The server keeps running, prints each received message, writes each message to the local clipboard, and waits for the next connection. Stop it with `Ctrl+C`.
 
 ## Run the C# P/Invoke Demo
 
