@@ -1,0 +1,52 @@
+name: Windows x64 Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Windows x64
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build solution
+        run: msbuild ClipBridge.sln /p:Configuration=Release /p:Platform=x64 /m
+
+      - name: Create release artifact
+        shell: pwsh
+        run: |
+          $packageRoot = "artifacts\ClipBridge-win-x64"
+          $cppDemo = Join-Path $packageRoot "cpp-demo"
+          $csharpDemo = Join-Path $packageRoot "csharp-demo"
+
+          New-Item -ItemType Directory -Force -Path $cppDemo, $csharpDemo | Out-Null
+
+          Copy-Item "x64\Release\ClipBridge.Cli.exe" $cppDemo
+          Copy-Item "x64\Release\ClipBridge.Native.dll" $cppDemo
+          Copy-Item "README.md" $cppDemo
+
+          Copy-Item "ClipBridge.CSharpDemo\bin\x64\Release\net8.0\*" $csharpDemo -Recurse
+          Copy-Item "README.md" $packageRoot
+
+          Compress-Archive -Path "$packageRoot\*" -DestinationPath "artifacts\ClipBridge-win-x64.zip" -Force
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClipBridge-win-x64
+          path: artifacts/ClipBridge-win-x64.zip
+          if-no-files-found: error

@@ -131,6 +131,26 @@ During local development, `Debug | x64` is also fine:
 
 All projects should target x64 so the C# process can load the x64 native DLL.
 
+## Automated Builds
+
+GitHub Actions builds ClipBridge on Windows x64 after every push to `main`.
+
+To download the latest automated build:
+
+1. Open the repository on GitHub.
+2. Go to `Actions`.
+3. Select the latest `Windows x64 Build` run.
+4. Download the `ClipBridge-win-x64` artifact.
+5. Extract `ClipBridge-win-x64.zip`.
+
+The artifact contains:
+
+```text
+cpp-demo\       C++ CLI demo with ClipBridge.Native.dll
+csharp-demo\    C# P/Invoke demo output
+README.md
+```
+
 ## Run the C++ Demo
 
 Start the server in one terminal:
