@@ -23,6 +23,9 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Restore C# project
+        run: dotnet restore ClipBridge.CSharpDemo/ClipBridge.CSharpDemo.csproj --property:Platform=x64
+
       - name: Build solution
         run: msbuild ClipBridge.sln /p:Configuration=Release /p:Platform=x64 /m
 
